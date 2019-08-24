@@ -1,0 +1,2 @@
+# blendtor
+Blend word detector

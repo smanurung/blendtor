@@ -3,6 +3,7 @@
 import argparse
 from ngram import NGram
 import smith_waterman as sm
+import eval
 
 def led(w1, w2):
     """
@@ -34,19 +35,31 @@ def ngram(w1, w2, n):
     d = len(g1) + len(g2) - 2 * len(list(n))
     return d
 
-def analyseLED(minsim, numpairs, outputfile):
+def jw():
+    """
+    jw: Jaro-Winkler Similarity
+    """
+
+def analyseLED(minsim, numpairs, outputfile, test):
     """
     analyseLED works with dictionary & candidate file to decide lexical blends using local edit distance.
     """
     # read from candidates.txt
     with open(outputfile, 'w') as fout, open('data/candidates.txt', 'r') as fcand, open('data/dict.txt', 'r') as fdict:
         dicts = fdict.readlines() # put into mem for multiple use
+        cands = fcand.readlines()
 
         # strip space character at the end of the word once only
         for i in range(len(dicts)):
             dicts[i] = dicts[i].rstrip()
 
-        for cand in fcand:
+        # if test is True, only iterate half of candidate list
+        r = len(cands)
+        if test:
+            r = int(r/2)
+
+        for i in range(r):
+            cand = cands[i]
             cand = cand.rstrip()
             count = 0
             
@@ -57,22 +70,28 @@ def analyseLED(minsim, numpairs, outputfile):
                     count += 1
 
                     if count > numpairs:
-                        msg = "{} {}\n".format(can, count)
+                        msg = "{} {}\n".format(cand, count)
                         print("[writeToOutputFile]", msg)
                         fout.write(msg)
                         break
     return 0
 
-def analyseNGram(n, maxdistance, numpairs, outputfile):
+def analyseNGram(n, maxdistance, numpairs, outputfile, test):
     # read from candidates.txt
     with open(outputfile, 'w') as fout, open('data/candidates.txt', 'r') as fcand, open('data/dict.txt', 'r') as fdict:
         dicts = fdict.readlines() # put into mem for multiple use
+        cands = fcand.readlines()
 
         # strip space character at the end of the word once only
         for i in range(len(dicts)):
             dicts[i] = dicts[i].rstrip()
 
-        for cand in fcand:
+        r = len(cands)
+        if test:
+            r = int(r/2)
+
+        for i in range(r):
+            cand = cands[i]
             cand = cand.rstrip()
             count = 0
             
@@ -89,30 +108,30 @@ def analyseNGram(n, maxdistance, numpairs, outputfile):
                         break
     return 0
 
-
-def evaluateNGram():
-    """
-    Retrieve the score of precision and recall for NGram(2)
-    """
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="lexical blend params")
-    parser.add_argument('--alg', '-a')
+    parser.add_argument('--mode', '-m')
+    parser.add_argument('--test', '-t', type=bool, default=False)
 
     args = parser.parse_args()
 
-    if args.alg == 'led':
+    if args.mode == 'led':
         minsim = 5
         numpairs = 2
         outputfile = 'output/led_minsim5_numpairs2.txt'
 
-        analyseLED(minsim, numpairs, outputfile)
-    elif args.alg == 'ngram':
+        analyseLED(minsim, numpairs, outputfile, args.test)
+    elif args.mode == 'ngram':
         gram = 2
         maxdistance = 15
         numpairs = 5
         outputfile = 'output/ngram_gram2_maxdistance15_numpairs5.txt'
         
-        analyseNGram(gram, maxdistance, numpairs, outputfile)
+        analyseNGram(gram, maxdistance, numpairs, outputfile, args.test)
+    elif args.mode == 'prec':
+        basefile = 'data/blends.txt'
+        predictedfile = 'output/ngram_gram2_maxdistance15_numpairs5.txt'
+        
+        eval.precision(basefile, predictedfile)
     else:
-        print("empty or invalid algorithm param:", args.alg)
+        print("empty or invalid algorithm param:", args.mode)

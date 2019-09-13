@@ -58,3 +58,8 @@ $ python blendtor/analysis.py
     variance	: 3.0560446141178232
     pvariance	: 3.04769476544537
 ```
+
+# External Libraries
+- [pyjarowinker](https://github.com/nap/jaro-winkler-distance)
+- [smith_waterman() function](https://gist.github.com/nornagon/6326a643fc30339ece3021013ed9b48c)
+- [ngram](http://github.com/gpoulter/python-ngram)

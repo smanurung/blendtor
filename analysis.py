@@ -3,8 +3,9 @@
 from pyjarowinkler import distance
 import statistics
 import blendtor
+import matplotlib.pyplot as plt
 
-def stat(name, d):
+def stat(name, d, xlabel, ylabel):
     """
     stat with input elements array
     """
@@ -26,7 +27,12 @@ def stat(name, d):
     variance\t: {}
     pvariance\t: {}
     """.format(name, mean, median, mode, stdev, pstdev, var, pvar))
-    # TODO: look into median and the whole data distribution
+
+    n, bins, patches = plt.hist(d)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    plt.show()
 
 def statNGram():
     d = []
@@ -41,7 +47,7 @@ def statNGram():
             d2 = blendtor.ngram(t, ttt, gram)
 
             d.extend([d1, d2])
-    stat('NGram', d)
+    stat('NGram', d, 'ngram distance', 'frequency')
 
 def statJW():
     d = []
@@ -55,7 +61,7 @@ def statJW():
             jw2 = distance.get_jaro_distance(t, ttt, False)
 
             d.extend([jw1, jw2])
-    stat('JW', d)
+    stat('JW', d, 'similarity value', 'frequency')
 
 def statLED():
     d = []
@@ -69,7 +75,7 @@ def statLED():
             s2 = blendtor.led(t, ttt)
 
             d.extend([s1, s2])
-    stat('LED', d)
+    stat('LED', d, 'local matches', 'frequency')
 
 if __name__ == "__main__":
     statJW()
